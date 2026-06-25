@@ -12,3 +12,4 @@ dist/core.js
 tsconfig.json
 package-lock.json
 **/*.vsix
+.github/**
