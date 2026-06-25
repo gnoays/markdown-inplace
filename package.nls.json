@@ -1,0 +1,21 @@
+{
+  "extension.description": "Render Markdown in place inside the editor — in code comments and .md files, without opening a preview pane",
+  "config.enabled.description": "Enable Markdown decoration inside comments",
+  "config.languages.description": "Restrict to specific language IDs (empty = all languages)",
+  "config.hideMarkers.description": "Visually hide Markdown markers such as **, *, `, # (except on the cursor line)",
+  "config.headingUppercase.description": "Display headings (# Heading) in uppercase",
+  "config.renderFencedCode.description": "Decorate fenced code blocks (```) inside comments",
+  "config.renderFencedCodeBackground.description": "Render background color for fenced code blocks",
+  "config.fencedCodeFullWidth.description": "Fill the fenced code block background to the end of the line (full editor width). Turn this on when gaps between lines are noticeable, to hide the seams",
+  "config.highlightFencedCode.description": "Syntax-highlight code inside fenced code blocks according to its language (e.g. ```python)",
+  "config.renderLists.description": "Decorate bullet lists and task lists inside comments",
+  "config.renderTables.description": "Decorate Markdown tables inside comments (assumes a monospace font)",
+  "config.renderBlockquotes.description": "Decorate blockquotes (> ) with a vertical bar on the left edge",
+  "config.renderMarkdownFile.description": "In Markdown (.md) files, decorate the entire file in place, not just comments",
+  "command.toggle.title": "Toggle Markdown InPlace",
+  "command.toggleHideMarkers.title": "Toggle Marker Hiding (Markdown InPlace)",
+  "command.toggleMarkdownFile.title": "Toggle Markdown File Rendering (Markdown InPlace)",
+  "config.renderImageHover.description": "Decorate image links (![caption](url)) with image previews on hover",
+  "config.renderLinkHover.description": "Show a preview of the target section on hover for links with anchors ([text](file#heading))",
+  "config.hoverImageMaxWidth.description": "The maximum width of the image preview on hover (in pixels)"
+}

@@ -1,0 +1,20 @@
+{
+  "extension.description": "プレビューを開かず、コードコメントや .md ファイル内のMarkdownをエディタ上でその場で描画する",
+  "config.enabled.description": "コメント内のMarkdown装飾を有効にする",
+  "config.languages.description": "対象言語IDを限定する場合に指定 (空なら全言語対象)",
+  "config.hideMarkers.description": "**、*、`、#などのMarkdownマーカーを視覚的に隠す(カーソル行は除く)",
+  "config.headingUppercase.description": "見出し (# 見出し) を大文字で表示する",
+  "config.renderFencedCode.description": "コメント内のフェンスドコードブロック(```)を装飾する",
+  "config.renderFencedCodeBackground.description": "フェンスドコードブロックの背景色を描画する",
+  "config.fencedCodeFullWidth.description": "フェンスドコードブロックの背景を行末まで(エディタ幅いっぱいに)塗る。行間の隙間が目立つ場合にONにすると継ぎ目が見えにくくなる",
+  "config.highlightFencedCode.description": "フェンスドコードブロック内のコードを言語に応じてシンタックスハイライトする(```python など)",
+  "config.renderLists.description": "コメント内の箇条書き・タスクリストを装飾する",
+  "config.renderTables.description": "コメント内のMarkdownテーブルを等幅フォント前提で装飾する",
+  "config.renderBlockquotes.description": "引用ブロック (> ) を左端の縦線バーで装飾する",
+  "config.renderMarkdownFile.description": "Markdown (.md) ファイルでは、コメントに限らずファイル全体をその場で装飾する",
+  "command.toggle.title": "Markdown InPlace を切り替え",
+  "command.toggleHideMarkers.title": "マーカー非表示を切り替え (Markdown InPlace)",
+  "command.toggleMarkdownFile.title": "Markdownファイル装飾を切り替え (Markdown InPlace)",
+  "config.renderImageHover.description": "画像リンク (![caption](url)) をホバーした際に画像のプレビューを表示する",
+  "config.hoverImageMaxWidth.description": "画像ホバープレビューの最大幅 (ピクセル単位)"
+}

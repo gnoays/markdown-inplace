@@ -1,0 +1,21 @@
+{
+  "extension.description": "在编辑器中就地渲染 Markdown——在代码注释和 .md 文件中，无需打开预览面板",
+  "config.enabled.description": "启用注释内的 Markdown 装饰",
+  "config.languages.description": "限制为特定语言 ID（空 = 所有语言）",
+  "config.hideMarkers.description": "视觉上隐藏 Markdown 标记，如 **、*、`、#（光标所在行除外）",
+  "config.headingUppercase.description": "以大写显示标题（# 标题）",
+  "config.renderFencedCode.description": "装饰注释内的围栏代码块（```）",
+  "config.renderFencedCodeBackground.description": "为围栏代码块渲染背景颜色",
+  "config.fencedCodeFullWidth.description": "将围栏代码块背景延伸至行尾（编辑器全宽）。当行间间隙明显时开启可隐藏接缝",
+  "config.highlightFencedCode.description": "根据语言对围栏代码块内的代码进行语法高亮（如 ```python）",
+  "config.renderLists.description": "装饰注释内的项目列表和任务列表",
+  "config.renderTables.description": "装饰注释内的 Markdown 表格（假定使用等宽字体）",
+  "config.renderBlockquotes.description": "用左侧竖线装饰引用块（> ）",
+  "config.renderMarkdownFile.description": "在 Markdown（.md）文件中，就地装饰整个文件，而不仅限于注释",
+  "command.toggle.title": "切换 Markdown InPlace",
+  "command.toggleHideMarkers.title": "切换标记隐藏（Markdown InPlace）",
+  "command.toggleMarkdownFile.title": "切换 Markdown 文件渲染（Markdown InPlace）",
+  "config.renderImageHover.description": "悬停图片链接（![caption](url)）时显示图片预览",
+  "config.renderLinkHover.description": "悬停带锚点的链接（[text](file#heading)）时显示目标章节预览",
+  "config.hoverImageMaxWidth.description": "悬停图片预览的最大宽度（像素）"
+}

@@ -1,0 +1,11 @@
+{
+  "Markdown InPlace: {0}": "Markdown InPlace: {0}",
+  "Marker hiding: {0}": "标记隐藏: {0}",
+  "Fenced code block decoration: {0}": "围栏代码块装饰: {0}",
+  "Fenced code block full-width background: {0}": "围栏代码块全宽背景: {0}",
+  "Fenced code syntax highlighting: {0}": "围栏代码语法高亮: {0}",
+  "List/task list decoration: {0}": "列表/任务列表装饰: {0}",
+  "Table decoration: {0}": "表格装饰: {0}",
+  "Blockquote decoration: {0}": "引用块装饰: {0}",
+  "Whole Markdown file decoration: {0}": "整个 Markdown 文件装饰: {0}"
+}

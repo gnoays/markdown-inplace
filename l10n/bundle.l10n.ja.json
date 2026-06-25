@@ -1,0 +1,11 @@
+{
+  "Markdown InPlace: {0}": "Markdown InPlace: {0}",
+  "Marker hiding: {0}": "マーカー非表示: {0}",
+  "Fenced code block decoration: {0}": "フェンスドコードブロック装飾: {0}",
+  "Fenced code block full-width background: {0}": "フェンスドコードブロックの背景を行全幅にする: {0}",
+  "Fenced code syntax highlighting: {0}": "フェンスドコードのシンタックスハイライト: {0}",
+  "List/task list decoration: {0}": "箇条書き/タスクリスト装飾: {0}",
+  "Table decoration: {0}": "テーブル装飾: {0}",
+  "Blockquote decoration: {0}": "引用ブロック装飾: {0}",
+  "Whole Markdown file decoration: {0}": "Markdownファイル全体の装飾: {0}"
+}

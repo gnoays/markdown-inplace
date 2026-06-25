@@ -1,0 +1,239 @@
+{
+    "name": "markdown-inplace",
+    "displayName": "Markdown InPlace",
+    "publisher": "gnoays",
+    "description": "%extension.description%",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/gnoays/markdown-inplace"
+    },
+    "version": "0.1.0",
+    "license": "MIT",
+    "l10n": "./l10n",
+    "engines": {
+        "vscode": "^1.85.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "keywords": [
+        "markdown",
+        "preview",
+        "comment",
+        "decoration",
+        "inline"
+    ],
+    "icon": "icon.png",
+    "galleryBanner": {
+        "color": "#1e1e2e",
+        "theme": "dark"
+    },
+    "activationEvents": [
+        "onStartupFinished"
+    ],
+    "main": "./dist/extension.js",
+    "contributes": {
+        "configuration": {
+            "title": "Markdown InPlace",
+            "properties": {
+                "markdownInplace.enabled": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "%config.enabled.description%"
+                },
+                "markdownInplace.languages": {
+                    "type": "array",
+                    "default": [],
+                    "description": "%config.languages.description%"
+                },
+                "markdownInplace.hideMarkers": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "%config.hideMarkers.description%"
+                },
+                "markdownInplace.headingUppercase": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "%config.headingUppercase.description%"
+                },
+                "markdownInplace.renderFencedCode": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "%config.renderFencedCode.description%"
+                },
+                "markdownInplace.renderFencedCodeBackground": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "%config.renderFencedCodeBackground.description%"
+                },
+                "markdownInplace.fencedCodeFullWidth": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "%config.fencedCodeFullWidth.description%"
+                },
+                "markdownInplace.highlightFencedCode": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "%config.highlightFencedCode.description%"
+                },
+                "markdownInplace.renderLists": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "%config.renderLists.description%"
+                },
+                "markdownInplace.renderTables": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "%config.renderTables.description%"
+                },
+                "markdownInplace.renderBlockquotes": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "%config.renderBlockquotes.description%"
+                },
+                "markdownInplace.renderMarkdownFile": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "%config.renderMarkdownFile.description%"
+                },
+                "markdownInplace.renderImageHover": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "%config.renderImageHover.description%"
+                },
+                "markdownInplace.renderLinkHover": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "%config.renderLinkHover.description%"
+                },
+                "markdownInplace.hoverImageMaxWidth": {
+                    "type": "integer",
+                    "default": 300,
+                    "description": "%config.hoverImageMaxWidth.description%"
+                }
+            }
+        },
+        "commands": [
+            {
+                "command": "markdownInplace.toggle",
+                "title": "%command.toggle.title%"
+            },
+            {
+                "command": "markdownInplace.toggleHideMarkers",
+                "title": "%command.toggleHideMarkers.title%"
+            },
+            {
+                "command": "markdownInplace.toggleMarkdownFile",
+                "title": "%command.toggleMarkdownFile.title%"
+            }
+        ],
+        "colors": [
+            {
+                "id": "markdownInplace.codeBlockBackground",
+                "description": "Background color for fenced code blocks",
+                "defaults": {
+                    "dark": "#ffffff0f",
+                    "light": "#0000000a",
+                    "highContrast": "#ffffff15"
+                }
+            },
+            {
+                "id": "markdownInplace.codeSpanBackground",
+                "description": "Background color for inline code spans",
+                "defaults": {
+                    "dark": "#ffffff1a",
+                    "light": "#0000000f",
+                    "highContrast": "#ffffff20"
+                }
+            },
+            {
+                "id": "markdownInplace.linkForeground",
+                "description": "Foreground color for markdown links",
+                "defaults": {
+                    "dark": "textLink.foreground",
+                    "light": "textLink.foreground",
+                    "highContrast": "textLink.foreground"
+                }
+            },
+            {
+                "id": "markdownInplace.descriptionForeground",
+                "description": "Color for list bullet glyphs, horizontal rules, and table borders",
+                "defaults": {
+                    "dark": "descriptionForeground",
+                    "light": "descriptionForeground",
+                    "highContrast": "descriptionForeground"
+                }
+            },
+            {
+                "id": "markdownInplace.blockquoteBorder",
+                "description": "Border color for blockquotes",
+                "defaults": {
+                    "dark": "textBlockQuote.border",
+                    "light": "textBlockQuote.border",
+                    "highContrast": "textBlockQuote.border"
+                }
+            },
+            {
+                "id": "markdownInplace.syntaxKeyword",
+                "description": "Syntax color for keywords in fenced code blocks",
+                "defaults": {
+                    "dark": "terminal.ansiBlue",
+                    "light": "terminal.ansiBlue",
+                    "highContrast": "terminal.ansiBlue"
+                }
+            },
+            {
+                "id": "markdownInplace.syntaxFunction",
+                "description": "Syntax color for functions in fenced code blocks",
+                "defaults": {
+                    "dark": "terminal.ansiYellow",
+                    "light": "terminal.ansiYellow",
+                    "highContrast": "terminal.ansiYellow"
+                }
+            },
+            {
+                "id": "markdownInplace.syntaxString",
+                "description": "Syntax color for strings in fenced code blocks",
+                "defaults": {
+                    "dark": "terminal.ansiGreen",
+                    "light": "terminal.ansiGreen",
+                    "highContrast": "terminal.ansiGreen"
+                }
+            },
+            {
+                "id": "markdownInplace.syntaxNumber",
+                "description": "Syntax color for numbers in fenced code blocks",
+                "defaults": {
+                    "dark": "terminal.ansiCyan",
+                    "light": "terminal.ansiCyan",
+                    "highContrast": "terminal.ansiCyan"
+                }
+            },
+            {
+                "id": "markdownInplace.syntaxComment",
+                "description": "Syntax color for comments in fenced code blocks",
+                "defaults": {
+                    "dark": "descriptionForeground",
+                    "light": "descriptionForeground",
+                    "highContrast": "descriptionForeground"
+                }
+            }
+        ]
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run package",
+        "package": "node esbuild.js --production",
+        "compile": "node esbuild.js",
+        "watch": "node esbuild.js --watch",
+        "check-types": "tsc --noEmit",
+        "test": "npm run compile && node test/decorations.test.js"
+    },
+    "devDependencies": {
+        "@types/node": "^20.19.43",
+        "@types/prismjs": "^1.26.0",
+        "@types/vscode": "^1.85.0",
+        "esbuild": "^0.28.1",
+        "prismjs": "^1.29.0",
+        "typescript": "^5.4.0"
+    }
+}
