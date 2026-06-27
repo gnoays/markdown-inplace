@@ -3,6 +3,20 @@ import { findHeadingLineBySlug } from '../core';
 
 const DEFAULT_ALLOWED_URI_SCHEMES = ['file', 'http', 'https', 'mailto'] as const;
 
+/**
+ * Determine the base URI to resolve a relative path against.
+ * For on-disk documents this is the document's parent directory.
+ * Unsaved (untitled) documents have no parent directory, so fall back to the
+ * first workspace folder; without one, relative paths cannot be resolved.
+ */
+function resolveRelativeBase(documentUri: vscode.Uri): vscode.Uri | undefined {
+  if (documentUri.scheme === 'untitled') {
+    const folder = vscode.workspace.workspaceFolders?.[0];
+    return folder?.uri;
+  }
+  return vscode.Uri.joinPath(documentUri, '..');
+}
+
 export interface ResolveLinkTargetOptions {
   allowedSchemes?: readonly string[];
 }
@@ -57,8 +71,10 @@ export async function resolveLinkTarget(
     targetUri = document.uri;
     bodyText = document.getText();
   } else {
+    const base = resolveRelativeBase(document.uri);
+    if (!base) return undefined;
     try {
-      targetUri = vscode.Uri.joinPath(document.uri, '..', cleanPath);
+      targetUri = vscode.Uri.joinPath(base, cleanPath);
     } catch {
       return undefined;
     }

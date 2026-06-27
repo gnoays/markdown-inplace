@@ -15,6 +15,7 @@
   "command.toggle.title": "切换 Markdown InPlace",
   "command.toggleHideMarkers.title": "切换标记隐藏（Markdown InPlace）",
   "command.toggleMarkdownFile.title": "切换 Markdown 文件渲染（Markdown InPlace）",
+  "config.renderInlineImages.description": "在编辑器中在图片 alt 文本（![alt](url)）旁显示图片图标（仅在隐藏标记时生效）",
   "config.renderImageHover.description": "悬停图片链接（![caption](url)）时显示图片预览",
   "config.renderLinkHover.description": "悬停带锚点的链接（[text](file#heading)）时显示目标章节预览",
   "config.hoverImageMaxWidth.description": "悬停图片预览的最大宽度（像素）"

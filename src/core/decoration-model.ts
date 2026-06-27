@@ -34,6 +34,11 @@ export interface LinkSpec {
   url: string;
 }
 
+export interface ImageSpec {
+  range: TextSpan;  // zero-width span at the position where the image appears
+  src: string;
+}
+
 export interface DecorationBuckets {
   hiddenRanges: TextSpan[];
   boldRanges: TextSpan[];
@@ -54,6 +59,7 @@ export interface DecorationBuckets {
   tablePaddingOptions: DecorationSpec[];
   tableTrailingWhitespaceRanges: TextSpan[];
   links: LinkSpec[];
+  imageRanges: ImageSpec[];
 }
 
 export interface EditableLineRange {
@@ -69,6 +75,7 @@ export interface ScanOptions {
   renderLists: boolean;
   renderTables: boolean;
   renderBlockquotes: boolean;
+  renderInlineImages: boolean;
 }
 
 export const DEFAULT_SCAN_OPTIONS: ScanOptions = {
@@ -79,6 +86,7 @@ export const DEFAULT_SCAN_OPTIONS: ScanOptions = {
   renderLists: true,
   renderTables: true,
   renderBlockquotes: true,
+  renderInlineImages: true,
 };
 
 export function createDecorationBuckets(): DecorationBuckets {
@@ -108,6 +116,7 @@ export function createDecorationBuckets(): DecorationBuckets {
     tablePaddingOptions: [],
     tableTrailingWhitespaceRanges: [],
     links: [],
+    imageRanges: [],
   };
 }
 

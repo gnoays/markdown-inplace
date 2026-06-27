@@ -12,6 +12,7 @@ export type Settings = {
   renderTables: boolean;
   renderBlockquotes: boolean;
   renderMarkdownFile: boolean;
+  renderInlineImages: boolean;
   renderImageHover: boolean;
   renderLinkHover: boolean;
   hoverImageMaxWidth: number;
@@ -37,6 +38,7 @@ type ArrayDef = {
 type NumberDef = {
   key: 'hoverImageMaxWidth';
   default: number;
+  recreate?: Recreate;
 };
 
 export const SETTING_DEFS = [
@@ -51,6 +53,7 @@ export const SETTING_DEFS = [
   { key: 'renderTables',       default: true },
   { key: 'renderBlockquotes',  default: true },
   { key: 'renderMarkdownFile', default: true,  command: 'markdownInplace.toggleMarkdownFile',        message: 'Whole Markdown file decoration: {0}' },
+  { key: 'renderInlineImages', default: true },
   { key: 'renderImageHover',   default: true },
   { key: 'renderLinkHover',    default: true },
   { key: 'hoverImageMaxWidth', default: 300 },

@@ -80,6 +80,14 @@ function toRanges(doc: vscode.TextDocument, ranges: readonly TextSpan[]): vscode
 
 // --- Decoration Types ---
 let decos: Decorations;
+const imageDecoCache = new Map<string, vscode.TextEditorDecorationType>();
+
+function disposeImageCache() {
+  for (const type of imageDecoCache.values()) {
+    type.dispose();
+  }
+  imageDecoCache.clear();
+}
 
 let settings: Settings;
 let timeout: NodeJS.Timeout | undefined;
@@ -102,6 +110,8 @@ let commentStateCache: CommentStateCache | undefined;
 let outputChannel: vscode.OutputChannel;
 
 const FULL_UPDATE_DELAY_MS = 150;
+const INLINE_IMAGE_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" fill="white" stroke="none"/><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" /></svg>';
+const INLINE_IMAGE_ICON = `data:image/svg+xml,${encodeURIComponent(INLINE_IMAGE_ICON_SVG)}`;
 const SELECTION_UPDATE_DELAY_MS = 50;
 const VISIBLE_CONTEXT_LINES = 200;
 
@@ -250,6 +260,9 @@ function clearAllDecorations(editor: vscode.TextEditor) {
   for (const deco of decos.getAllTypes()) {
     editor.setDecorations(deco, []);
   }
+  for (const type of imageDecoCache.values()) {
+    editor.setDecorations(type, []);
+  }
   currentLinks = [];
   lastRenderKey = '';
 }
@@ -332,6 +345,7 @@ function updateDecorations() {
       renderLists: settings.renderLists,
       renderTables: settings.renderTables,
       renderBlockquotes: settings.renderBlockquotes,
+      renderInlineImages: settings.renderInlineImages,
     };
     const currentSelectionsKey = selectionsKey(editor.selections);
     const targetRange = getScanLineRange(editor);
@@ -355,6 +369,7 @@ function updateDecorations() {
       isMarkdownFile,
       syntaxKey,
       settings.languages.join(','),
+      settings.renderInlineImages,
     ].join('|');
 
     if (renderKey === lastRenderKey) {
@@ -409,6 +424,25 @@ function updateDecorations() {
 
     decos.headings.forEach((d, i) => editor.setDecorations(d, toRanges(doc, buckets.headingRangesByLevel[i])));
 
+    // Apply a fixed image icon decoration. The actual image preview remains available via hover.
+    const imageIconRanges = buckets.imageRanges.map((img) => toVscodeRange(doc, img.range));
+    for (const [src, type] of imageDecoCache) {
+      editor.setDecorations(type, src === INLINE_IMAGE_ICON ? imageIconRanges : []);
+    }
+    if (imageIconRanges.length > 0 && !imageDecoCache.has(INLINE_IMAGE_ICON)) {
+      const inlineImageSize = '1em';
+      const type = vscode.window.createTextEditorDecorationType({
+        before: {
+          contentIconPath: vscode.Uri.parse(INLINE_IMAGE_ICON),
+          height: inlineImageSize,
+          width: inlineImageSize,
+          textDecoration: 'none; display: inline-block; vertical-align: middle;' +
+            'background-size: contain !important; background-repeat: no-repeat !important;',
+        },
+      });
+      imageDecoCache.set(INLINE_IMAGE_ICON, type);
+      editor.setDecorations(type, imageIconRanges);
+    }
     currentLinks = buckets.links;
     lastRenderKey = renderKey;
 
@@ -454,6 +488,7 @@ function getScanLineRange(editor: vscode.TextEditor): { startLine: number; endLi
 export function deactivate() {
   log('Extension deactivated');
   decos?.dispose();
+  disposeImageCache();
 }
 
 function wrapDocument(doc: vscode.TextDocument): TextDocumentLike {

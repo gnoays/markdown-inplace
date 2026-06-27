@@ -96,6 +96,11 @@
                     "default": true,
                     "description": "%config.renderMarkdownFile.description%"
                 },
+                "markdownInplace.renderInlineImages": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "%config.renderInlineImages.description%"
+                },
                 "markdownInplace.renderImageHover": {
                     "type": "boolean",
                     "default": true,

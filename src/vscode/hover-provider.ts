@@ -153,10 +153,33 @@ export function registerImageHoverProvider(context: vscode.ExtensionContext, set
 
         const lineText = document.lineAt(position.line).text;
 
-        // Markdown image syntax: ![caption](url) or ![caption](url "title")
-        // Capture the contents of the title in m[3]
-        const imgRegex = /(!\[.*?\])\(\s*([^\s\)]+)(?:\s+["'(](.*?)["')])?\s*\)/g;
+        // [![alt](img_url)](link_url) — image-in-link: show clickable image in hover
+        const imgInLinkRegex = /\[!\[([^\]]*)\]\(([^)]*)\)\]\(([^)]+)\)/g;
         let m: RegExpExecArray | null;
+        while ((m = imgInLinkRegex.exec(lineText)) !== null) {
+          const startChar = m.index;
+          const endChar = startChar + m[0].length;
+          if (position.character < startChar || position.character > endChar) continue;
+
+          const imgDest = extractLinkDestination(m[2]);
+          if (!imgDest) continue;
+          const resolved = await resolveLinkTarget(document, imgDest.url, { allowedSchemes: ['file', 'http', 'https'] });
+          if (!resolved) continue;
+
+          const width = settings.hoverImageMaxWidth;
+          const src = escapeHtmlAttribute(resolved.toString());
+          const link = escapeHtmlAttribute(m[3].trim());
+          const alt = escapeMarkdownText(m[1]);
+          const range = new vscode.Range(position.line, startChar, position.line, endChar);
+          const md = new vscode.MarkdownString(`<a href="${link}"><img src="${src}" alt="${alt}" width="${width}" /></a>`);
+          md.supportHtml = true;
+          md.isTrusted = false;
+          log(`Image-in-link hover: img=${resolved} link=${link}`);
+          return new vscode.Hover(md, range);
+        }
+
+        // Markdown image syntax: ![caption](url) or ![caption](url "title")
+        const imgRegex = /(!\[.*?\])\(\s*([^\s\)]+)(?:\s+["'(](.*?)["')])?\s*\)/g;
         while ((m = imgRegex.exec(lineText)) !== null) {
           const startChar = m.index;
           const endChar = startChar + m[0].length;

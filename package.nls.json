@@ -15,6 +15,7 @@
   "command.toggle.title": "Toggle Markdown InPlace",
   "command.toggleHideMarkers.title": "Toggle Marker Hiding (Markdown InPlace)",
   "command.toggleMarkdownFile.title": "Toggle Markdown File Rendering (Markdown InPlace)",
+  "config.renderInlineImages.description": "Show an image icon next to image alt text (![alt](url)) in the editor (requires Hide Markers to be on)",
   "config.renderImageHover.description": "Decorate image links (![caption](url)) with image previews on hover",
   "config.renderLinkHover.description": "Show a preview of the target section on hover for links with anchors ([text](file#heading))",
   "config.hoverImageMaxWidth.description": "The maximum width of the image preview on hover (in pixels)"

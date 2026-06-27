@@ -408,15 +408,32 @@ function scanLineMarkdown(
     const outerEnd = start + lk.outerEnd;
     const textStart = start + lk.textStart;
     const textEnd = start + lk.textEnd;
+    const isEditable = touchesEditableLine(doc, outerStart, outerEnd, editableLines);
 
-    if (!touchesEditableLine(doc, outerStart, outerEnd, editableLines)) {
-      buckets.hiddenRanges.push(span(outerStart, textStart));
-      buckets.hiddenRanges.push(span(textEnd, outerEnd));
-    }
-    const contentRange = span(textStart, textEnd);
-    buckets.linkRanges.push(contentRange);
-    if (lk.dest !== undefined) {
-      buckets.links.push({ range: contentRange, url: lk.dest });
+    if (lk.image && options.hideMarkers && !isEditable) {
+      // Image entry ![alt](src). The alt text stays visible (for hover/readability)
+      // and, when enabled, the inline image is shown before it. When nested in a
+      // link, the surrounding link entry supplies the clickable navigation.
+      const altStart = start + lk.image.altStart;
+      const altEnd = start + lk.image.altEnd;
+      buckets.hiddenRanges.push(span(outerStart, altStart));
+      buckets.hiddenRanges.push(span(altEnd, outerEnd));
+      if (altStart < altEnd) {
+        buckets.linkRanges.push(span(altStart, altEnd));
+      }
+      if (options.renderInlineImages) {
+        buckets.imageRanges.push({ range: span(outerStart, outerStart), src: lk.image.src });
+      }
+    } else {
+      if (!isEditable) {
+        buckets.hiddenRanges.push(span(outerStart, textStart));
+        buckets.hiddenRanges.push(span(textEnd, outerEnd));
+      }
+      const contentRange = span(textStart, textEnd);
+      buckets.linkRanges.push(contentRange);
+      if (lk.dest !== undefined) {
+        buckets.links.push({ range: contentRange, url: lk.dest });
+      }
     }
   }
 
