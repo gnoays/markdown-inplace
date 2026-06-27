@@ -1,13 +1,35 @@
-export function extractLinkDestination(raw: string): string | undefined {
+export interface LinkDestination {
+  url: string;
+  title?: string;
+}
+
+export function extractLinkDestination(raw: string): LinkDestination | undefined {
   const s = raw.trim();
   if (s.length === 0) return undefined;
+
+  let url: string;
+  let rest: string;
+
   if (s.startsWith('<')) {
     const end = s.indexOf('>');
     if (end === -1) return undefined;
-    return s.slice(1, end).trim() || undefined;
+    url = s.slice(1, end).trim();
+    if (!url) return undefined;
+    rest = s.slice(end + 1).trim();
+  } else {
+    const m = /^(\S+)/.exec(s);
+    if (!m) return undefined;
+    url = m[1];
+    rest = s.slice(m[0].length).trim();
   }
-  const m = /^(\S+)/.exec(s);
-  return m ? m[1] : undefined;
+
+  let title: string | undefined;
+  if (rest.length > 0) {
+    const tm = /^(?:"([^"]*)"|'([^']*)'|\(([^)]*)\))$/.exec(rest);
+    if (tm) title = tm[1] ?? tm[2] ?? tm[3];
+  }
+
+  return { url, title };
 }
 
 export function slugify(text: string): string {

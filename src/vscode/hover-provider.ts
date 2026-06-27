@@ -119,7 +119,7 @@ export function registerLinkHoverProvider(context: vscode.ExtensionContext, sett
           const dest = extractLinkDestination(m[2]);
           if (!dest) continue;
 
-          const resolved = await resolveLinkTarget(document, dest, { allowedSchemes: [] });
+          const resolved = await resolveLinkTarget(document, dest.url, { allowedSchemes: [] });
           if (!resolved) continue;
 
           if (!resolved.fragment.match(/^L\d+$/)) continue;
