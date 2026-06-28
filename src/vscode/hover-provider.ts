@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { resolveLinkTarget, readDocumentText } from './link-targets';
 import { Settings } from './settings';
 import { log } from '../extension';
-import { extractCommentLinesFromDocument, extractLinkDestination, getCommentSyntax, TextDocumentLike } from '../core';
+import { extractCommentLinesFromDocument, getCommentSyntax, parseInlineSpans, TextDocumentLike } from '../core';
 
 const MAX_SECTION_LINES = 30;
 const HEADING_RE = /^(#{1,6})\s/;
@@ -109,17 +109,18 @@ export function registerLinkHoverProvider(context: vscode.ExtensionContext, sett
         if (!settings.renderLinkHover) return undefined;
 
         const lineText = document.lineAt(position.line).text;
-        const linkRegex = /(?<![!\\])\[((?:[^\]\n\\]|\\.)+?)\]\(((?:[^)\n\\]|\\.)+?)\)/g;
-        let m: RegExpExecArray | null;
-        while ((m = linkRegex.exec(lineText)) !== null) {
-          const matchStart = m.index;
-          const matchEnd = matchStart + m[0].length;
-          if (position.character < matchStart || position.character > matchEnd) continue;
+        // Reuse the same scanner that drives decorations/clicks so the hover
+        // resolves the identical link (correct bracket nesting, outer dest).
+        const { links } = parseInlineSpans(lineText);
+        for (const link of links) {
+          if (link.image || !link.dest) continue;
+          if (position.character < link.outerStart || position.character > link.outerEnd) continue;
 
-          const dest = extractLinkDestination(m[2]);
-          if (!dest) continue;
-
-          const resolved = await resolveLinkTarget(document, dest.url, { allowedSchemes: [] });
+          const hoveredImage = links.some((entry) => entry.image &&
+            link.textStart <= entry.outerStart && entry.outerEnd <= link.textEnd &&
+            position.character >= entry.outerStart && position.character <= entry.outerEnd);
+          if (hoveredImage) continue;
+          const resolved = await resolveLinkTarget(document, link.dest, { allowedSchemes: [] });
           if (!resolved) continue;
 
           if (!resolved.fragment.match(/^L\d+$/)) continue;
@@ -134,7 +135,7 @@ export function registerLinkHoverProvider(context: vscode.ExtensionContext, sett
           if (!sectionMd) continue;
 
           log(`Link hover: ${fileUri.fsPath}#L${headingLine + 1} lang=${langId}`);
-          const range = new vscode.Range(position.line, matchStart, position.line, matchEnd);
+          const range = new vscode.Range(position.line, link.outerStart, position.line, link.outerEnd);
           const md = new vscode.MarkdownString(sectionMd);
           md.isTrusted = false;
           return new vscode.Hover(md, range);
@@ -152,51 +153,41 @@ export function registerImageHoverProvider(context: vscode.ExtensionContext, set
         if (!settings.renderImageHover) return undefined;
 
         const lineText = document.lineAt(position.line).text;
+        const { links } = parseInlineSpans(lineText);
 
-        // [![alt](img_url)](link_url) — image-in-link: show clickable image in hover
-        const imgInLinkRegex = /\[!\[([^\]]*)\]\(([^)]*)\)\]\(([^)]+)\)/g;
-        let m: RegExpExecArray | null;
-        while ((m = imgInLinkRegex.exec(lineText)) !== null) {
-          const startChar = m.index;
-          const endChar = startChar + m[0].length;
-          if (position.character < startChar || position.character > endChar) continue;
+        for (const entry of links) {
+          if (!entry.image) continue;
 
-          const imgDest = extractLinkDestination(m[2]);
-          if (!imgDest) continue;
-          const resolved = await resolveLinkTarget(document, imgDest.url, { allowedSchemes: ['file', 'http', 'https'] });
+          // An image is "in a link" when a real link's text fully encloses it,
+          // i.e. [![alt](img)](url). Such a hover renders a clickable image.
+          const wrapping = links.find((l) => !l.image && l.dest &&
+            l.textStart <= entry.outerStart && entry.outerEnd <= l.textEnd);
+          const rangeStart = entry.outerStart;
+          const rangeEnd = entry.outerEnd;
+          if (position.character < rangeStart || position.character > rangeEnd) continue;
+
+          const img = entry.image;
+          const resolved = await resolveLinkTarget(document, img.src, { allowedSchemes: ['file', 'http', 'https'] });
           if (!resolved) continue;
 
           const width = settings.hoverImageMaxWidth;
           const src = escapeHtmlAttribute(resolved.toString());
-          const link = escapeHtmlAttribute(m[3].trim());
-          const alt = escapeMarkdownText(m[1]);
-          const range = new vscode.Range(position.line, startChar, position.line, endChar);
-          const md = new vscode.MarkdownString(`<a href="${link}"><img src="${src}" alt="${alt}" width="${width}" /></a>`);
+          const alt = escapeMarkdownText(lineText.slice(img.altStart, img.altEnd));
+          const range = new vscode.Range(position.line, rangeStart, position.line, rangeEnd);
+
+          let md: vscode.MarkdownString;
+          if (wrapping?.dest) {
+            const href = escapeHtmlAttribute(wrapping.dest.trim());
+            md = new vscode.MarkdownString(`<a href="${href}"><img src="${src}" alt="${alt}" width="${width}" /></a>`);
+            log(`Image-in-link hover: img=${resolved} link=${href}`);
+          } else {
+            const titleHeader = img.srcTitle ? `**${escapeMarkdownText(img.srcTitle)}**\n\n` : '';
+            md = new vscode.MarkdownString(`${titleHeader}<img src="${src}" width="${width}" />`);
+            log(`Image hover: img=${resolved}`);
+          }
           md.supportHtml = true;
           md.isTrusted = false;
-          log(`Image-in-link hover: img=${resolved} link=${link}`);
           return new vscode.Hover(md, range);
-        }
-
-        // Markdown image syntax: ![caption](url) or ![caption](url "title")
-        const imgRegex = /(!\[.*?\])\(\s*([^\s\)]+)(?:\s+["'(](.*?)["')])?\s*\)/g;
-        while ((m = imgRegex.exec(lineText)) !== null) {
-          const startChar = m.index;
-          const endChar = startChar + m[0].length;
-          if (position.character >= startChar && position.character <= endChar) {
-            const range = new vscode.Range(position.line, startChar, position.line, endChar);
-            const resolved = await resolveLinkTarget(document, m[2], { allowedSchemes: ['file', 'http', 'https'] });
-            log(`Link: ${resolved}`);
-            if (resolved) {
-              const width = settings.hoverImageMaxWidth;
-              const titleHeader = m[3] ? `**${escapeMarkdownText(m[3])}**\n\n` : '';
-              const src = escapeHtmlAttribute(resolved.toString());
-              const md = new vscode.MarkdownString(`${titleHeader}<img src="${src}" width="${width}" />`);
-              md.supportHtml = true;
-              md.isTrusted = false;
-              return new vscode.Hover(md, range);
-            }
-          }
         }
 
         return undefined;

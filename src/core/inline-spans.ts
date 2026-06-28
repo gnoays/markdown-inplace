@@ -69,6 +69,23 @@ export function parseInlineSpans(text: string): InlineSpans {
     for (let k = s; k < e; k++) emphasisInert[k] = 1;
   };
 
+  const findCodeSpanEnd = (tickStart: number, hi: number): number | undefined => {
+    let tickEnd = tickStart;
+    while (tickEnd < hi && text[tickEnd] === '`') tickEnd++;
+    const tickLen = tickEnd - tickStart;
+
+    let j = tickEnd;
+    while (j < hi) {
+      if (text[j] === '`') {
+        const closeStart = j;
+        while (j < hi && text[j] === '`') j++;
+        if (j - closeStart === tickLen) return j;
+      } else {
+        j++;
+      }
+    }
+    return undefined;
+  };
   // Scan [lo, hi) for code spans, images, and (when allowLinks) links. Shared
   // state (codeSpans/links/inert masks) is mutated; link text is recursed into
   // with allowLinks=false.
@@ -82,39 +99,32 @@ export function parseInlineSpans(text: string): InlineSpans {
       // ── Code span ──────────────────────────────────────────────────────────
       if (ch === '`') {
         const tickStart = i;
-        while (i < hi && text[i] === '`') i++;
-        const tickLen = i - tickStart;
+        let contentStart = tickStart;
+        while (contentStart < hi && text[contentStart] === '`') contentStart++;
+        const tickLen = contentStart - tickStart;
+        const codeSpanEnd = findCodeSpanEnd(tickStart, hi);
 
-        // Find the matching closing run of exactly tickLen backticks.
-        let j = i;
-        while (j < hi) {
-          if (text[j] === '`') {
-            const closeStart = j;
-            while (j < hi && text[j] === '`') j++;
-            if (j - closeStart === tickLen) {
-              let content = text.slice(i, closeStart);
-              // CommonMark space-stripping: one leading/trailing space removed when
-              // both are present and the content is not all spaces.
-              if (
-                content.length >= 2 &&
-                content[0] === ' ' &&
-                content[content.length - 1] === ' ' &&
-                content.trim().length > 0
-              ) {
-                content = content.slice(1, -1);
-              }
-              codeSpans.push({ outerStart: tickStart, outerEnd: j, content, tickLen });
-              markInert(tickStart, j);
-              markEmphasisInert(tickStart, j);
-              i = j;
-              break;
-            }
-            // Mismatched-length closing run — keep searching.
-          } else {
-            j++;
+        if (codeSpanEnd !== undefined) {
+          const closeStart = codeSpanEnd - tickLen;
+          let content = text.slice(contentStart, closeStart);
+          // CommonMark space-stripping: one leading/trailing space removed when
+          // both are present and the content is not all spaces.
+          if (
+            content.length >= 2 &&
+            content[0] === ' ' &&
+            content[content.length - 1] === ' ' &&
+            content.trim().length > 0
+          ) {
+            content = content.slice(1, -1);
           }
+          codeSpans.push({ outerStart: tickStart, outerEnd: codeSpanEnd, content, tickLen });
+          markInert(tickStart, codeSpanEnd);
+          markEmphasisInert(tickStart, codeSpanEnd);
+          i = codeSpanEnd;
+        } else {
+          // No matching close: skip past the opening ticks and keep scanning.
+          i = contentStart;
         }
-        // If no close found, i already advanced past the opening ticks; continue.
         continue;
       }
 
@@ -134,6 +144,10 @@ export function parseInlineSpans(text: string): InlineSpans {
           while (j < hi) {
             if (inert[j] || isEscapedAt(text, j)) { j++; continue; }
             if (text[j] === '\n') break;
+            if (text[j] === '`') {
+              const codeSpanEnd = findCodeSpanEnd(j, hi);
+              if (codeSpanEnd !== undefined) { j = codeSpanEnd; continue; }
+            }
             if (text[j] === '[') { bracketDepth++; j++; continue; }
             if (text[j] === ']') {
               if (bracketDepth > 0) { bracketDepth--; j++; continue; }

@@ -4,6 +4,7 @@ node_modules/
 # Build output
 out/
 dist/
+.tmp/
 *.tsbuildinfo
 
 # Auto-generated (esbuild.js / scripts/gen-prism-imports.cjs)
