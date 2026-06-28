@@ -41,6 +41,7 @@ function languageIdFromUri(uri: vscode.Uri): string {
     rs: 'rust', java: 'java', c: 'c', cpp: 'cpp',
     cs: 'csharp', php: 'php', swift: 'swift',
     kt: 'kotlin', sh: 'shellscript',
+    md: 'markdown', markdown: 'markdown', mdx: 'markdown',
   };
   return map[ext] ?? ext;
 }
@@ -61,10 +62,30 @@ function escapeHtmlAttribute(value: string): string {
     .replace(/>/g, '&gt;');
 }
 
+function isWorkspaceFile(uri: vscode.Uri): boolean {
+  return uri.scheme === 'file' && !!vscode.workspace.getWorkspaceFolder(uri);
+}
+
+function isMarkdownLanguage(languageId: string): boolean {
+  return languageId === 'markdown';
+}
+
+function truncateLines(rawLines: string[], startLine: number): string | undefined {
+  const result = rawLines.slice(startLine, startLine + MAX_SECTION_LINES);
+  if (result.length === MAX_SECTION_LINES && startLine + MAX_SECTION_LINES < rawLines.length) {
+    result.push('...');
+  }
+  return result.join('\n') || undefined;
+}
+
+function extractDocumentStartMarkdown(fileText: string, languageId: string): string | undefined {
+  if (!isMarkdownLanguage(languageId)) return undefined;
+  return truncateLines(fileText.split(/\r?\n/), 0);
+}
 function extractSectionMarkdown(fileText: string, headingLine: number, languageId: string): string | undefined {
   const rawLines = fileText.split(/\r?\n/);
 
-  if (languageId === 'markdown') {
+  if (isMarkdownLanguage(languageId)) {
     const hm = HEADING_RE.exec(rawLines[headingLine] ?? '');
     const level = hm ? hm[1].length : 0;
     const result: string[] = [];
@@ -120,23 +141,32 @@ export function registerLinkHoverProvider(context: vscode.ExtensionContext, sett
             link.textStart <= entry.outerStart && entry.outerEnd <= link.textEnd &&
             position.character >= entry.outerStart && position.character <= entry.outerEnd);
           if (hoveredImage) continue;
-          const resolved = await resolveLinkTarget(document, link.dest, { allowedSchemes: [] });
+          const resolved = await resolveLinkTarget(document, link.dest, { allowedSchemes: ['file'] });
           if (!resolved) continue;
 
-          if (!resolved.fragment.match(/^L\d+$/)) continue;
+          const hasAnchor = link.dest.includes('#');
+          const hasHeadingLine = /^L\d+$/.test(resolved.fragment);
+          if (hasAnchor && !hasHeadingLine) continue;
 
-          const headingLine = parseInt(resolved.fragment.slice(1)) - 1;
+          const headingLine = hasHeadingLine ? parseInt(resolved.fragment.slice(1), 10) - 1 : undefined;
           const fileUri = resolved.with({ fragment: '' });
+          const currentUri = document.uri.with({ fragment: '' });
+          const isSameDocument = fileUri.toString() === currentUri.toString();
+          if (!isSameDocument && !isWorkspaceFile(fileUri)) continue;
+
           const fileText = await readDocumentText(fileUri);
           if (!fileText) continue;
 
           const langId = languageIdFromUri(fileUri);
-          const sectionMd = extractSectionMarkdown(fileText, headingLine, langId);
-          if (!sectionMd) continue;
+          const previewMd = headingLine !== undefined
+            ? extractSectionMarkdown(fileText, headingLine, langId)
+            : extractDocumentStartMarkdown(fileText, langId);
+          if (!previewMd) continue;
 
-          log(`Link hover: ${fileUri.fsPath}#L${headingLine + 1} lang=${langId}`);
+          const targetLabel = headingLine !== undefined ? `#L${headingLine + 1}` : '';
+          log(`Link hover: ${fileUri.fsPath}${targetLabel} lang=${langId}`);
           const range = new vscode.Range(position.line, link.outerStart, position.line, link.outerEnd);
-          const md = new vscode.MarkdownString(sectionMd);
+          const md = new vscode.MarkdownString(previewMd);
           md.isTrusted = false;
           return new vscode.Hover(md, range);
         }
