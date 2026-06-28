@@ -40,7 +40,12 @@ jobs:
         with:
           name: extension-vsix
       - name: Publish to Visual Studio Marketplace
-        run: npx @vscode/vsce publish --packagePath *.vsix
+        run: |
+          if [ -z "$VSCE_PAT" ]; then
+            echo "VSCE_PAT is not set"
+            exit 1
+          fi
+          npx @vscode/vsce publish --packagePath *.vsix
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
 
@@ -52,6 +57,11 @@ jobs:
         with:
           name: extension-vsix
       - name: Publish to Open VSX
-        run: npx ovsx publish *.vsix
+        run: |
+          if [ -z "$OVSX_PAT" ]; then
+            echo "OVSX_PAT is not set"
+            exit 1
+          fi
+          npx ovsx publish *.vsix
         env:
           OVSX_PAT: ${{ secrets.OVSX_PAT }}
