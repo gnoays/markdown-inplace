@@ -1,69 +1,89 @@
 # Markdown InPlace
 
-Renders Markdown syntax **in place inside the editor** — in code comments (`// ...`, `# ...`, `/* ... */`, etc.) and `.md` files — without opening a separate preview pane.
+Markdown InPlace makes Markdown-style code comments easier to read directly in the editor. It styles Markdown syntax in source comments, doc comments, and Markdown files without opening a separate preview pane.
 
-## Supported Syntax
+It is built for notes that live next to code: explanations, TODOs, API docs, design notes, and lightweight Markdown where staying in the editor matters more than full Markdown rendering.
 
-| Syntax | Rendered as |
+[![GitHub Release](https://img.shields.io/github/v/release/gnoays/markdown-inplace?label=Release&logo=github)](https://github.com/gnoays/markdown-inplace/releases)
+[![Open VSX Version](https://img.shields.io/open-vsx/v/gnoays/markdown-inplace)](https://open-vsx.org/extension/gnoays/markdown-inplace)
+[![VS Marketplace](https://img.shields.io/badge/VS%20Marketplace-install-007ACC)](https://marketplace.visualstudio.com/items?itemName=gnoays.markdown-inplace)
+[![CI](https://github.com/gnoays/markdown-inplace/actions/workflows/ci.yml/badge.svg)](https://github.com/gnoays/markdown-inplace/actions/workflows/ci.yml)
+[![License](https://img.shields.io/github/license/gnoays/markdown-inplace)](LICENSE)
+
+## What It Does
+
+- Treats code comments as Markdown content across supported languages.
+- Styles emphasis, inline code, headings, links, lists, blockquotes, tables, horizontal rules, and fenced code blocks in place.
+- Soft-hides Markdown markers such as `**`, `*`, `` ` ``, `~~`, and heading `#`, while showing them on the cursor line for editing.
+- Lets you turn marker hiding on or off with `markdownInplace.hideMarkers`.
+- Also decorates `.md` files when `markdownInplace.renderMarkdownFile` is enabled.
+- Opens Markdown links and shows hover previews for images and local Markdown links.
+
+## Examples
+
+| Markdown | In-place behavior |
 | --- | --- |
-| `**bold**` `__bold__` | **bold** |
-| `*italic*` `_italic_` | *italic* |
-| `***bold italic***` | ***bold + italic*** |
-| `` `code` `` | monospace + background |
-| `~~strikethrough~~` | strikethrough |
-| `# Heading` … `###### Heading` | scaled + bold (optional uppercase) |
-| `[text](URL)` | link color + underline, Ctrl+click to open (supports relative paths `./foo.md`, heading anchors `#section`, `./foo.md#section`, and titled links `(URL "title")`) |
-| `---` `***` `___` | horizontal rule |
-| `- item` / `1. item` | bullet / numbered list |
-| `- [ ]` / `- [x]` | task list (checkbox) |
-| `> quote` | left-edge vertical bar |
-| Markdown table | column-aligned display (assumes monospace font) |
-| ` ```lang ` fenced code block | code background + syntax highlighting |
+| `**bold**`, `*italic*`, `~~deleted~~` | Styled text with markers hidden outside the cursor line |
+| `` `code` `` | Inline code styling with background |
+| `# Heading` | Larger bold heading text |
+| `[text](./README.md#examples)` | Link styling, navigation, and local section hover |
+| `![alt](./icon.png)` | Inline image marker plus image hover preview |
+| `- [x] item` | Checkbox-style list marker |
+| `> quote` | Blockquote bar |
+| Markdown table | Column-aligned display in monospace editors |
+| Fenced code block | Code background and syntax highlighting |
 
-Rust doc comments (`///`, `//!`, `/** ... */`, `/*! ... */`) are treated as Markdown body.  
-In `.md` files, the entire file is decorated — not just comments (`markdownInplace.renderMarkdownFile`, default ON).
+## Links and Hovers
 
-## Unsupported Syntax
+Links support absolute URLs, `mailto:`, relative files, and heading anchors such as `#section` or `./docs.md#section`. Heading anchors use GitHub-style slugs.
 
-Due to the nature of inline editor rendering, the following are displayed as **plain text**:
+Hover behavior:
 
-| Syntax | Status |
-| --- | --- |
-| Images `![alt](url)` | Partial — no inline image display, but hover shows a preview (`markdownInplace.hoverImageMaxWidth`, default 300 px) |
-| Mermaid / diagrams (` ```mermaid `) | Not supported (rendered as a code block) |
-| Math (LaTeX `$...$` / `$$...$$`) | Not supported |
-| Inline HTML (`<div>` etc.) | Not supported (shown as-is) |
-| Footnotes `[^1]` / reference links `[text][ref]` | Not supported |
-| Bare URL auto-linking | Not supported (`[text](URL)` form only) |
+- `[](./README.md)` shows the beginning of the workspace Markdown file.
+- `[](./README.md#links-and-hovers)` shows the target Markdown section.
+- `[](#usage)` shows the target section in the current file.
+- `![alt](./icon.png)` shows an image preview.
+- `[![alt](./icon.png)](./README.md)` shows the image preview when hovering the image, and the link preview when hovering the rest of the link text.
 
-## Visual Behavior
+## Supported Scope
 
-- **Marker hiding**: Markers such as `**`, `*`, `` ` ``, `~~`, `#` are visually hidden by default (`markdownInplace.hideMarkers`).  
-  Markers on the **cursor line are always shown** for easy editing.
-- **Headings**: Font size scales across 6 levels (h1–h6) with bold styling.  
-  `markdownInplace.headingUppercase` (default OFF) enables uppercase display.
-- **Links**: Only the `text` part of `[text](url)` is colored and underlined.  
-  `Ctrl+click` (or `Cmd+click` on Mac) opens the target. Absolute URLs (`http(s)`, `mailto`), relative paths (`./foo.md`, `../bar.ts`), and heading anchors (`#section`, `./foo.md#section`) are all supported. GitHub-style slugs are used to resolve heading targets.
-- **Fenced code blocks**: Opening and closing fences are not hidden; only body lines get a code background.  
-  A virtual trailing space is added to short lines to approximate the block's full width.  
-  Disable with `markdownInplace.renderFencedCodeBackground` (default ON).
-- **Tables**: Detects `| name | value |` + `| --- | --- |` format and adds virtual padding to align columns.  
-  Lines under the cursor or selection retain near-raw display for easy editing.
+Markdown InPlace intentionally supports a practical Markdown subset for editor decoration. It is not a full CommonMark preview engine.
 
-## Known Limitations
+Not currently supported:
 
-- Table column alignment assumes a monospace font. If columns look misaligned, disable with `markdownInplace.renderTables`.
+- Reference links such as `[text][ref]`
+- Footnotes
+- Bare URL autolinking
+- Math rendering
+- Mermaid or other diagrams
+- Inline HTML rendering
 
-## Commands
+Unsupported syntax is left as plain text.
 
-Open the Command Palette (`Ctrl+Shift+P`) to toggle features. All other settings are available under `markdownInplace.*` in VS Code settings.
+## Settings
 
-- `Toggle Markdown InPlace` — enable / disable the extension
-- `Toggle Marker Hiding (Markdown InPlace)` — show / hide `**`, `*`, `` ` `` etc.
-- `Toggle Markdown File Rendering (Markdown InPlace)` — enable / disable decoration of `.md` files
+Most behavior is controlled through `markdownInplace.*` settings. Common toggles include:
 
-The display language (English / Japanese / Chinese) follows VS Code's UI language.
+- `markdownInplace.enabled`
+- `markdownInplace.hideMarkers`
+- `markdownInplace.renderMarkdownFile`
+- `markdownInplace.renderInlineImages`
+- `markdownInplace.renderImageHover`
+- `markdownInplace.renderLinkHover`
+- `markdownInplace.renderTables`
+- `markdownInplace.renderFencedCode`
+
+The command palette also includes:
+
+- `Toggle Markdown InPlace`
+- `Toggle Marker Hiding (Markdown InPlace)`
+- `Toggle Markdown File Rendering (Markdown InPlace)`
+
+## Notes
+
+- Table alignment assumes a monospace editor font.
+- The display language follows the editor UI language when available.
 
 ## License
 
-MIT License — see the [LICENSE](LICENSE) file. Copyright (c) 2026 gnoays.
+MIT License. See [LICENSE](LICENSE).
