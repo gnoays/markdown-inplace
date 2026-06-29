@@ -18,10 +18,13 @@
     ],
     "keywords": [
         "markdown",
+        "comments",
+        "inline",
         "preview",
-        "comment",
+        "inline-preview",
         "decoration",
-        "inline"
+        "hover",
+        "notes"
     ],
     "icon": "icon.png",
     "galleryBanner": {
